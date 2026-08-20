@@ -282,6 +282,23 @@ html.lenis body {
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
 
+/* Header logosi ortidagi nur - sekin kuchayib-susayadi */
+.logo-glow {
+  animation: logo-glow 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes logo-glow {
+  0%, 100% { opacity: 0.35; transform: scale(0.9); }
+  50%      { opacity: 0.7;  transform: scale(1.15); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-glow {
+    animation: none;
+  }
+}
+
 /* Glowing Neon Elements */
 .neon-glow {
   box-shadow: 0 0 20px rgba(61, 240, 139, 0.2);

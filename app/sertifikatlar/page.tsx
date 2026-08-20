@@ -8,13 +8,9 @@ import { X, ExternalLink, Calendar, Award, ShieldCheck, ZoomIn } from "lucide-re
 export default function CertificatesPage() {
   const [selectedCert, setSelectedCert] = useState<Certificate | null>(null);
 
-  // Repeat certificates to make the marquee look long and continuous
-  const duplicatedCertificates = [
-    ...certificates,
-    ...certificates,
-    ...certificates,
-    ...certificates,
-  ];
+  // Marquee uzluksiz ko'rinishi uchun ro'yxat cho'ziladi. Ko'proq takrorlash
+  // sahifani sekinlashtiradi - har bir nusxa alohida <img> tugun demak.
+  const duplicatedCertificates = [...certificates, ...certificates];
 
   return (
     <div className="relative min-h-screen bg-background pt-24 pb-12 flex flex-col justify-between overflow-hidden space-dot-pattern">
@@ -78,8 +74,12 @@ export default function CertificatesPage() {
                   {/* Certificate preview */}
                   <div className="relative w-full h-[76%] rounded-2xl overflow-hidden bg-black/50 border border-white/5 flex items-center justify-center">
                     <img
-                      src={cert.rasm}
+                      src={cert.kichik}
                       alt={cert.nomi}
+                      loading={idx < 3 ? "eager" : "lazy"}
+                      decoding="async"
+                      width={740}
+                      height={493}
                       className="w-full h-full object-cover opacity-85 group-hover:opacity-100 group-hover:scale-[1.03] transition-all duration-500"
                     />
                     {/* Zoom icon on hover */}
@@ -113,8 +113,12 @@ export default function CertificatesPage() {
                   {/* Certificate preview */}
                   <div className="relative w-full h-[76%] rounded-2xl overflow-hidden bg-black/50 border border-white/5 flex items-center justify-center">
                     <img
-                      src={cert.rasm}
+                      src={cert.kichik}
                       alt={cert.nomi}
+                      loading="lazy"
+                      decoding="async"
+                      width={740}
+                      height={493}
                       className="w-full h-full object-cover opacity-85 group-hover:opacity-100 group-hover:scale-[1.03] transition-all duration-500"
                     />
                     {/* Zoom icon on hover */}

@@ -1,10 +1,146 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  useMotionValue,
+  useSpring,
+  useTransform,
+} from "framer-motion";
 import { services, Service } from "@/content/services";
 import { Laptop, Brain, Bot, ArrowRight, X, Clock, CheckCircle } from "lucide-react";
 import Link from "next/link";
+
+const iconMap: { [key: string]: any } = {
+  "fa-laptop-code": Laptop,
+  "fa-brain": Brain,
+  "fa-robot": Bot,
+};
+
+/**
+ * Xizmat kartochkasi - bosh sahifadagi "Biografiya" panellari bilan bir xil
+ * his: sichqoncha ortidan 3D egilish, hover'da kattalashish, bosilganda
+ * siqilish va chegara yashil bo'lishi. Butun kartochka aloqa sahifasiga
+ * olib boradi; ichidagi "Batafsil" esa tafsilotlar oynasini ochadi.
+ */
+function ServiceCard({
+  service,
+  compact = false,
+  onDetails,
+}: {
+  service: Service;
+  compact?: boolean;
+  onDetails: (service: Service) => void;
+}) {
+  const Icon = iconMap[service.icon] || Laptop;
+
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const mouseXSpring = useSpring(x);
+  const mouseYSpring = useSpring(y);
+
+  // Diqqat: qiymatlar "12deg" emas, oddiy son bo'lishi kerak - aks holda
+  // framer-motion birlikni o'girolmay xatolik beradi.
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], [12, -12]);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], [-12, 12]);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    x.set((e.clientX - rect.left - rect.width / 2) / rect.width);
+    y.set((e.clientY - rect.top - rect.height / 2) / rect.height);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  const handleDetails = (e: React.MouseEvent) => {
+    // Kartochkaning o'zi Link - tafsilotlar tugmasi o'tishni to'xtatadi
+    e.preventDefault();
+    e.stopPropagation();
+    onDetails(service);
+  };
+
+  return (
+    <Link
+      href={`/aloqa?xizmat=${service.id}`}
+      className="block no-underline"
+      style={{ perspective: "1000px" }}
+    >
+      <motion.div
+        style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        whileHover={{ scale: 1.05, z: 40, transition: { duration: 0.3 } }}
+        whileTap={{ scale: 0.97, z: 10, transition: { duration: 0.12 } }}
+        className={`glass-panel border border-white/5 hover:border-accent/40 active:border-accent transition-colors duration-300 cursor-pointer select-none relative group shadow-2xl ${
+          compact ? "rounded-2xl p-5" : "rounded-3xl p-6 max-w-[280px]"
+        }`}
+      >
+        <div className={compact ? "flex items-start gap-4" : "space-y-4"}>
+          <div
+            className={`rounded-2xl bg-accent/10 text-accent w-fit flex-shrink-0 group-hover:bg-accent group-hover:text-black group-active:bg-accent group-active:text-black transition-all duration-300 ${
+              compact ? "p-3 rounded-xl" : "p-3.5"
+            }`}
+          >
+            <Icon size={compact ? 20 : 24} />
+          </div>
+
+          <div className={compact ? "space-y-1.5 text-left" : "space-y-1"}>
+            <h4
+              className={`font-display font-bold text-white leading-snug group-hover:text-accent group-active:text-accent transition-colors ${
+                compact ? "text-sm" : "text-base"
+              }`}
+            >
+              {service.nomi}
+            </h4>
+            <p
+              className={`text-xs text-mutedText leading-relaxed ${
+                compact ? "line-clamp-2" : "line-clamp-3"
+              }`}
+            >
+              {service.kaltatavsif}
+            </p>
+
+            {compact && (
+              <div className="flex items-center gap-3 pt-1">
+                <span className="text-[11px] font-bold text-accent inline-flex items-center gap-1">
+                  <span>Buyurtma berish</span>
+                  <ArrowRight size={10} />
+                </span>
+                <button
+                  type="button"
+                  onClick={handleDetails}
+                  className="text-[11px] font-semibold text-white/50 hover:text-white underline underline-offset-2 transition-colors"
+                >
+                  Batafsil
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {!compact && (
+          <div className="flex items-center justify-between gap-2 pt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <span className="text-[11px] font-semibold text-accent inline-flex items-center gap-1">
+              <span>Buyurtma berish</span>
+              <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
+            </span>
+            <button
+              type="button"
+              onClick={handleDetails}
+              className="text-[11px] font-semibold text-white/50 hover:text-white underline underline-offset-2 transition-colors"
+            >
+              Batafsil
+            </button>
+          </div>
+        )}
+      </motion.div>
+    </Link>
+  );
+}
 
 export default function ServicesPage() {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
@@ -21,19 +157,11 @@ export default function ServicesPage() {
 
   const handleMouseMove = (e: React.MouseEvent) => {
     const { clientX, clientY } = e;
-    const width = window.innerWidth;
-    const height = window.innerHeight;
     // Normalized coordinates from -0.5 to 0.5
     setMousePos({
-      x: (clientX / width) - 0.5,
-      y: (clientY / height) - 0.5,
+      x: clientX / window.innerWidth - 0.5,
+      y: clientY / window.innerHeight - 0.5,
     });
-  };
-
-  const iconMap: { [key: string]: any } = {
-    "fa-laptop-code": Laptop,
-    "fa-brain": Brain,
-    "fa-robot": Bot,
   };
 
   // Positions for absolute collage cards on desktop (spaced to avoid overlapping center text)
@@ -51,11 +179,13 @@ export default function ServicesPage() {
       {/* Background radial gradient overlay */}
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,rgba(61,240,139,0.02),transparent_60%)]" />
 
-      {/* COLLAGE LAYOUT FOR DESKTOP (Relative to entire screen height) */}
-      <div className="hidden lg:block absolute inset-0 pointer-events-none z-0">
+      {/* COLLAGE LAYOUT FOR DESKTOP (Relative to entire screen height)
+          z-20: markazdagi matn bloki `relative` bo'lgani uchun DOM tartibida
+          undan yuqorida turadi va bosishlarni o'ziga olib ketardi -
+          shuning uchun kollaj undan tepada bo'lishi shart. */}
+      <div className="hidden lg:block absolute inset-0 pointer-events-none z-20">
         <div className="max-w-7xl mx-auto px-4 w-full h-full relative">
           {services.map((service, idx) => {
-            const IconComponent = iconMap[service.icon] || Laptop;
             const pos = positions[idx];
 
             return (
@@ -77,35 +207,15 @@ export default function ServicesPage() {
               >
                 {/* Slow float animation */}
                 <motion.div
-                  animate={{
-                    y: [0, -10, 0],
-                  }}
+                  animate={{ y: [0, -10, 0] }}
                   transition={{
                     duration: 6,
                     repeat: Infinity,
                     ease: "easeInOut",
                     delay: idx * 1.2,
                   }}
-                  onClick={() => setSelectedService(service)}
-                  className="glass-panel rounded-3xl p-6 border border-white/5 cursor-pointer max-w-[280px] shadow-2xl relative group hover:border-accent/30 transition-colors duration-300"
                 >
-                  <div className="space-y-4">
-                    <div className="p-3.5 rounded-2xl bg-accent/10 text-accent w-fit group-hover:bg-accent group-hover:text-black transition-all duration-300">
-                      <IconComponent size={24} />
-                    </div>
-                    <div className="space-y-1">
-                      <h4 className="font-display font-bold text-white text-base leading-snug group-hover:text-accent transition-colors">
-                        {service.nomi}
-                      </h4>
-                      <p className="text-xs text-mutedText line-clamp-3 leading-relaxed">
-                        {service.kaltatavsif}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-1 text-[11px] font-semibold text-accent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                      <span>Batafsil ma&apos;lumot</span>
-                      <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
-                    </div>
-                  </div>
+                  <ServiceCard service={service} onDetails={setSelectedService} />
                 </motion.div>
               </motion.div>
             );
@@ -115,7 +225,7 @@ export default function ServicesPage() {
 
       {/* Main Container */}
       <div className="max-w-7xl mx-auto px-4 w-full h-full min-h-[70vh] flex flex-col justify-center relative">
-        
+
         {/* CENTER TITLE & DESCRIPTION */}
         <div className="text-center z-10 max-w-2xl mx-auto space-y-6 select-none my-16 md:my-0">
           <motion.h2
@@ -141,42 +251,20 @@ export default function ServicesPage() {
 
         {/* RESPONSIVE GRID LAYOUT FOR MOBILE/TABLET */}
         <div className="lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-xl mx-auto mt-4 px-2">
-          {services.map((service, idx) => {
-            const IconComponent = iconMap[service.icon] || Laptop;
-            return (
-              <motion.div
-                key={service.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: idx * 0.1 }}
-                onClick={() => setSelectedService(service)}
-                className="glass-panel rounded-2xl p-5 border border-white/5 cursor-pointer hover:border-accent/30 transition-all duration-200"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="p-3 rounded-xl bg-accent/10 text-accent flex-shrink-0">
-                    <IconComponent size={20} />
-                  </div>
-                  <div className="space-y-1.5 text-left">
-                    <h4 className="font-bold text-white text-sm leading-snug">
-                      {service.nomi}
-                    </h4>
-                    <p className="text-xs text-mutedText line-clamp-2">
-                      {service.kaltatavsif}
-                    </p>
-                    <div className="text-[11px] text-accent font-bold inline-flex items-center gap-1 pt-1">
-                      <span>Batafsil</span>
-                      <ArrowRight size={10} />
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })}
+          {services.map((service, idx) => (
+            <motion.div
+              key={service.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: idx * 0.1 }}
+            >
+              <ServiceCard service={service} compact onDetails={setSelectedService} />
+            </motion.div>
+          ))}
         </div>
 
       </div>
 
-      {/* FRAME ANIMATED DETAIL OVERLAY (Framer Motion layoutId) */}
       {/* FRAME ANIMATED DETAIL OVERLAY (Standard scale/fade modal) */}
       <AnimatePresence>
         {selectedService && (

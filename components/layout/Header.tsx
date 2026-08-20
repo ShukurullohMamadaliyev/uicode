@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
+import { motion } from "framer-motion";
 import { siteContent } from "@/content/site";
 
 export default function Header() {
@@ -34,13 +35,25 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link
-            href="/"
-            className="flex items-center group transition-transform duration-300 hover:scale-[1.02]"
-          >
+          {/* Logo ikkiga bo'lingan: faqat kvadrat ikonka sakraydi,
+              "UiCode" yozuvi qimirlamay turadi. */}
+          <Link href="/" className="flex items-center gap-2 group">
+            <span className="relative inline-flex items-center justify-center shrink-0">
+              {/* Ikonka ortidagi yumshoq nur - sekin "nafas oladi" */}
+              <span className="logo-glow absolute inset-0 rounded-full bg-accent/30 blur-xl" />
+              <motion.img
+                src="/logo-icon.png"
+                alt="UiCode"
+                className="relative h-10 w-auto object-contain"
+                animate={{ y: [0, -4, 0], rotate: [0, -4, 0, 4, 0] }}
+                transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+                whileHover={{ scale: 1.15, rotate: 0, transition: { duration: 0.25 } }}
+                whileTap={{ scale: 0.94, transition: { duration: 0.1 } }}
+              />
+            </span>
             <img
-              src="/logo.png"
-              alt="UiCode Logo"
+              src="/logo-text.png"
+              alt="UiCode"
               className="h-10 w-auto object-contain"
             />
           </Link>

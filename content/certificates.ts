@@ -3,7 +3,8 @@ export interface Certificate {
   tashkilot: string;
   yil: string;
   logo: string;
-  rasm: string; // Real path in public/sertifikat/
+  rasm: string; // To'liq o'lchamdagi rasm (modal oynasi uchun)
+  kichik: string; // Yengil nusxa (ro'yxatdagi kartochkalar uchun)
   id: string;
   url: string;
 }
@@ -18,6 +19,7 @@ export const certificates: Certificate[] = [
     yil: "2026",
     logo: "Meta",
     rasm: "/sertifikat/certificate_of_completion.webp",
+    kichik: "/sertifikat/kichik/certificate_of_completion.webp",
     id: "CF-2026-MFE-78124",
     url: "https://coursera.org/verify/CF-2026-MFE-78124",
   },
@@ -27,6 +29,7 @@ export const certificates: Certificate[] = [
     yil: "2025",
     logo: "Node / Nest",
     rasm: "/sertifikat/it_park_certificate.webp",
+    kichik: "/sertifikat/kichik/it_park_certificate.webp",
     id: "",
     url: "/sertifikat/it_park_certificate.webp",
   },
@@ -36,6 +39,7 @@ export const certificates: Certificate[] = [
     yil: "2025",
     logo: "TG Bot",
     rasm: "/sertifikat/tatu_university_certificate.webp",
+    kichik: "/sertifikat/kichik/tatu_university_certificate.webp",
     id: "TATU-2025-PYBOT-074",
     url: "https://cert.tatu.uz/verify/TATU-2025-PYBOT-074",
   },
@@ -45,6 +49,7 @@ export const certificates: Certificate[] = [
     yil: "2025",
     logo: "SQL DB",
     rasm: "/sertifikat/premium_certificate_landscape.webp",
+    kichik: "/sertifikat/kichik/premium_certificate_landscape.webp",
     id: "",
     url: "/sertifikat/premium_certificate_landscape.webp",
   },
@@ -54,6 +59,7 @@ export const certificates: Certificate[] = [
     yil: "2025",
     logo: "JS Algo",
     rasm: "/sertifikat/luxury_certificate_design.webp",
+    kichik: "/sertifikat/kichik/luxury_certificate_design.webp",
     id: "",
     url: "/sertifikat/luxury_certificate_design.webp",
   },
