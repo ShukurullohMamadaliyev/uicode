@@ -5,6 +5,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import SmoothScroll from "@/components/layout/SmoothScroll";
 import ScrollToTop from "@/components/layout/ScrollToTop";
+import PrefetchAssets from "@/components/layout/PrefetchAssets";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -49,6 +50,7 @@ export default function RootLayout({
           <main>{children}</main>
           <Footer />
           <ScrollToTop />
+          <PrefetchAssets />
         </SmoothScroll>
       </body>
     </html>

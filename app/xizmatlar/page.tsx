@@ -11,6 +11,7 @@ import {
 import { services, Service } from "@/content/services";
 import { Laptop, Brain, Bot, ArrowRight, X, Clock, CheckCircle } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const iconMap: { [key: string]: any } = {
   "fa-laptop-code": Laptop,
@@ -34,6 +35,7 @@ function ServiceCard({
   onDetails: (service: Service) => void;
 }) {
   const Icon = iconMap[service.icon] || Laptop;
+  const router = useRouter();
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -57,25 +59,32 @@ function ServiceCard({
   };
 
   const handleDetails = (e: React.MouseEvent) => {
-    // Kartochkaning o'zi Link - tafsilotlar tugmasi o'tishni to'xtatadi
-    e.preventDefault();
+    // Hodisani shu yerda to'xtatamiz - aks holda u kartochkaga ko'tarilib,
+    // aloqa sahifasiga o'tkazib yuboradi.
     e.stopPropagation();
     onDetails(service);
   };
 
+  const goToOrder = () => router.push(`/aloqa?xizmat=${service.id}`);
+
   return (
-    <Link
-      href={`/aloqa?xizmat=${service.id}`}
-      className="block no-underline"
-      style={{ perspective: "1000px" }}
-    >
+    <div style={{ perspective: "1000px" }}>
       <motion.div
         style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
+        onClick={goToOrder}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            goToOrder();
+          }
+        }}
+        role="link"
+        tabIndex={0}
         whileHover={{ scale: 1.05, z: 40, transition: { duration: 0.3 } }}
         whileTap={{ scale: 0.97, z: 10, transition: { duration: 0.12 } }}
-        className={`glass-panel border border-white/5 hover:border-accent/40 active:border-accent transition-colors duration-300 cursor-pointer select-none relative group shadow-2xl ${
+        className={`glass-panel border border-white/5 hover:border-accent/40 active:border-accent transition-colors duration-300 cursor-pointer select-none relative group shadow-2xl outline-none focus-visible:border-accent ${
           compact ? "rounded-2xl p-5" : "rounded-3xl p-6 max-w-[280px]"
         }`}
       >
@@ -106,10 +115,15 @@ function ServiceCard({
 
             {compact && (
               <div className="flex items-center gap-3 pt-1">
-                <span className="text-[11px] font-bold text-accent inline-flex items-center gap-1">
+                {/* Haqiqiy havola - qidiruv tizimlari va "yangi oynada ochish" uchun */}
+                <Link
+                  href={`/aloqa?xizmat=${service.id}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="text-[11px] font-bold text-accent inline-flex items-center gap-1"
+                >
                   <span>Buyurtma berish</span>
                   <ArrowRight size={10} />
-                </span>
+                </Link>
                 <button
                   type="button"
                   onClick={handleDetails}
@@ -124,21 +138,25 @@ function ServiceCard({
 
         {!compact && (
           <div className="flex items-center justify-between gap-2 pt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <span className="text-[11px] font-semibold text-accent inline-flex items-center gap-1">
+            <Link
+              href={`/aloqa?xizmat=${service.id}`}
+              onClick={(e) => e.stopPropagation()}
+              className="text-[11px] font-semibold text-accent inline-flex items-center gap-1"
+            >
               <span>Buyurtma berish</span>
               <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
-            </span>
+            </Link>
             <button
               type="button"
               onClick={handleDetails}
-              className="text-[11px] font-semibold text-white/50 hover:text-white underline underline-offset-2 transition-colors"
+              className="text-[11px] font-semibold text-white/50 hover:text-white underline underline-offset-2 px-2 py-1 -mr-1 rounded-md hover:bg-white/5 transition-colors"
             >
               Batafsil
             </button>
           </div>
         )}
       </motion.div>
-    </Link>
+    </div>
   );
 }
 
